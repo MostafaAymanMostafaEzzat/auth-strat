@@ -112,7 +112,8 @@ const login = async (req, res) => {
   res.status(StatusCodes.OK).json({ user: tokenUser });
 };
 const logout = async (req, res) => {
-  await Token.findByIdAndDelete({user:req.user.userId})
+  await Token.findOneAndDelete({ user: req.user.userId });
+
   res.cookie('accessToken', 'logout', {
     httpOnly: true,
     expires: new Date(Date.now()),
