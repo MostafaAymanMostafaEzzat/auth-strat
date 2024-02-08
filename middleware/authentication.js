@@ -9,7 +9,7 @@ const authenticateUser = async (req, res, next) => {
     if(accessToken){
       const payload = isTokenValid( accessToken );
       req.user = payload.user;
-       next();
+      return next();
     }
     const payload = isTokenValid( refreshToken );
     const existingToken =await Token.findOne({
