@@ -14,7 +14,7 @@ const authenticateUser = async (req, res, next) => {
     const payload = isTokenValid( refreshToken );
     const existingToken =await Token.findOne({
       user:payload.user.userId,
-      refreshToken:existingToken.refreshToken
+      refreshToken:payload.refreshToken
     })
 
     if(!existingToken || !existingToken?.isValid){
@@ -22,7 +22,7 @@ const authenticateUser = async (req, res, next) => {
 
     }
 
-    attachCookiesToResponse({res,user:payload.user,refreshToken:payload.refreshToken})
+    attachCookiesToResponse({res,user:payload.user,refreshToken:existingToken.refreshToken})
     req.user = payload.user;
     next();
   } catch (error) {
