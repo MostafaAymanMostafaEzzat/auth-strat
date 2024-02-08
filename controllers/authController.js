@@ -56,7 +56,7 @@ if (verificationToken !== user.verificationToken) {
 }
 
 user.isVerified=true
-user.verifiedDate=new Date.now()
+user.verifiedDate= Date.now()
 user.verificationToken = '';
 await user.save();
 
