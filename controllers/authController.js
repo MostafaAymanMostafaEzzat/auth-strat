@@ -32,6 +32,33 @@ const register = async (req, res) => {
 
   res.status(StatusCodes.CREATED).json({ msg: 'Success! Please check your email to verify account'});
 };
+
+
+
+
+const verifyEmail= async (req,res) =>{
+const {email,verificationToken}=req.body
+if (!email || !verificationToken) {
+  throw new CustomError.BadRequestError(' email and verificationToken not found');
+}
+const user=await User.findOne({email})
+if (!user) {
+  throw new CustomError.UnauthenticatedError('Verification Failed');
+}
+if (!verificationToken === user.verificationToken) {
+  throw new CustomError.UnauthenticatedError('Verification Failed');
+}
+
+user.isVerified=true
+user.verifiedDate=new Date.now()
+user.verificationToken = '';
+await user.save();
+
+res.status(StatusCodes.OK).json({msg:'Email Verified'})
+
+
+
+}
 const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -46,6 +73,10 @@ const login = async (req, res) => {
   const isPasswordCorrect = await user.comparePassword(password);
   if (!isPasswordCorrect) {
     throw new CustomError.UnauthenticatedError('Invalid Credentials');
+  }
+
+  if (!user.isVerified) {
+    throw new CustomError.UnauthenticatedError('Please verify your email');
   }
   const tokenUser = createTokenUser(user);
   attachCookiesToResponse({ res, user: tokenUser });
@@ -63,5 +94,6 @@ const logout = async (req, res) => {
 module.exports = {
   register,
   login,
+  verifyEmail,
   logout,
 };
