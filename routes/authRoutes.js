@@ -11,6 +11,6 @@ router.post('/login', login);
 router.delete('/logout', authenticateUser,logout);
 router.post('/verify-email', verifyEmail);
 router.post('/forgot-password', verifyEmail);
-router.post('/reset-email', verifyEmail);
+router.post('/reset-password', verifyEmail);
 
 module.exports = router;
