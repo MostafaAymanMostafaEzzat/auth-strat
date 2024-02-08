@@ -45,7 +45,7 @@ const user=await User.findOne({email})
 if (!user) {
   throw new CustomError.UnauthenticatedError('Verification Failed');
 }
-if (!verificationToken === user.verificationToken) {
+if (verificationToken !== user.verificationToken) {
   throw new CustomError.UnauthenticatedError('Verification Failed');
 }
 
