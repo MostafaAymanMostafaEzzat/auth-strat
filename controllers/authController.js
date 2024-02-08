@@ -100,8 +100,8 @@ const login = async (req, res) => {
     return;
   }
   refreshToken= crypto.randomBytes(40).toString('hex');
-  const ip = req.headers['ip'];
-  const userAgent = req.headers['userAgent'];
+  const ip = req.ip
+  const userAgent = req.headers['user-agent'];
 
   const token = await Token.create({refreshToken,ip,userAgent,user:user._id})
 
