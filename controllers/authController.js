@@ -86,6 +86,8 @@ const login = async (req, res) => {
   if (!user.isVerified) {
     throw new CustomError.UnauthenticatedError('Please verify your email');
   }
+  const tokenUser = createTokenUser(user);
+
 //create refreshToken and accessToken
   let refreshToken=''
   //check if there are existingToken for that user
@@ -105,7 +107,6 @@ const login = async (req, res) => {
 
   const token = await Token.create({refreshToken,ip,userAgent,user:user._id})
 
-  const tokenUser = createTokenUser(user);
   attachCookiesToResponse({ res, user: tokenUser , refreshToken });
 
   res.status(StatusCodes.OK).json({ user: tokenUser });
