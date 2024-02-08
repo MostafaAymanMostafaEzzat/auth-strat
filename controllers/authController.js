@@ -39,13 +39,19 @@ const register = async (req, res) => {
 const verifyEmail= async (req,res) =>{
 const {email,verificationToken}=req.body
 if (!email || !verificationToken) {
+  console.log('111111')
   throw new CustomError.BadRequestError(' email and verificationToken not found');
+
 }
 const user=await User.findOne({email})
 if (!user) {
+  console.log('22222222')
+
   throw new CustomError.UnauthenticatedError('Verification Failed');
 }
 if (verificationToken !== user.verificationToken) {
+  console.log('33333333')
+
   throw new CustomError.UnauthenticatedError('Verification Failed');
 }
 
