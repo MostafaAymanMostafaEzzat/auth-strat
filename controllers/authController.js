@@ -1,9 +1,11 @@
 const User = require('../models/User');
+const Token = require('../models/Tokens');
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const { attachCookiesToResponse, createTokenUser,  sendResetPasswordEmail,
   sendVerificationEmail } = require('../utils');
-const cyrpto = require('crypto');
+const crypto = require('crypto');
+const { read } = require('fs');
 
 
 const register = async (req, res) => {
@@ -19,7 +21,7 @@ const register = async (req, res) => {
   const role = isFirstAccount ? 'admin' : 'user';
 
   
-  const verificationToken = cyrpto.randomBytes(40).toString('hex');
+  const verificationToken = crypto.randomBytes(40).toString('hex');
   const user = await User.create({ name, email, password, role,verificationToken });
   const origin = 'https://react-3t4g.onrender.com';
 
@@ -84,8 +86,27 @@ const login = async (req, res) => {
   if (!user.isVerified) {
     throw new CustomError.UnauthenticatedError('Please verify your email');
   }
+//create refreshToken and accessToken
+  let refreshToken=''
+  //check if there are existingToken for that user
+  const existingToken=await Token.findOne({user:user._id})
+  if(existingToken){
+    if(!existingToken.isValid){
+    throw new CustomError.UnauthenticatedError('your account is blocked');
+    }
+    refreshToken=existingToken.refreshToken;
+    attachCookiesToResponse({ res, user: tokenUser , refreshToken });
+    res.status(StatusCodes.OK).json({ user: tokenUser });
+    return;
+  }
+  refreshToken= crypto.randomBytes(40).toString('hex');
+  const ip = req.headers['ip'];
+  const userAgent = req.headers['userAgent'];
+
+  const token = await Token.create({refreshToken,ip,userAgent,user:user._id})
+
   const tokenUser = createTokenUser(user);
-  attachCookiesToResponse({ res, user: tokenUser });
+  attachCookiesToResponse({ res, user: tokenUser , refreshToken });
 
   res.status(StatusCodes.OK).json({ user: tokenUser });
 };
