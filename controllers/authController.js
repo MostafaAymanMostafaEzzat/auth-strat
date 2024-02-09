@@ -150,7 +150,7 @@ const resetPassword = async (req,res)=>{
   }
   const user = await User.findOne({ email });
   if (user) {
-    if(token === user.passwordToken && Date.now() > user.passwordTokenExpirationDate){
+    if(token === user.passwordToken && Date.now() < user.passwordTokenExpirationDate){
       user.passwordToken='';
       user.password=password;
       user.passwordTokenExpirationDate = null;
@@ -158,6 +158,8 @@ const resetPassword = async (req,res)=>{
     }
 
   }
+  
+
 
   res.status(StatusCodes.OK).json({msg:'reset Password'})
 }
