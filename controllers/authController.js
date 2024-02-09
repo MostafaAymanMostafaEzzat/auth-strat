@@ -6,6 +6,7 @@ const { attachCookiesToResponse, createTokenUser,  sendResetPasswordEmail,
   sendVerificationEmail } = require('../utils');
 const crypto = require('crypto');
 const { read } = require('fs');
+const origin = 'https://react-3t4g.onrender.com';
 
 
 const register = async (req, res) => {
@@ -23,7 +24,6 @@ const register = async (req, res) => {
   
   const verificationToken = crypto.randomBytes(40).toString('hex');
   const user = await User.create({ name, email, password, role,verificationToken });
-  const origin = 'https://react-3t4g.onrender.com';
 
 
   //send Email
@@ -126,11 +126,40 @@ const logout = async (req, res) => {
 };
 
 const forgotPassword = async (req,res)=>{
-  res.status(StatusCodes.OK).json({msg:'forgotPassword'})
+  const {email} =req.body;
+  if (!email ) {
+    throw new CustomError.BadRequestError('Please provide email ');
+  }
+  const user = await User.findOne({ email });
+
+  if (user) {
+    const passwordToken =crypto.randomBytes(60).toString('hex');
+    user.passwordToken=passwordToken;
+    user.passwordTokenExpirationDate=new Date(Date.now() + 1000*60*5);
+    await user.save();
+   await sendResetPasswordEmail({name:user.name,email:user.email,token:passwordToken,origin})
+
+  }
+  res.status(StatusCodes.OK).json({msg: 'Please check your email for reset password link'})
 }
 
 const resetPassword = async (req,res)=>{
-  res.status(StatusCodes.OK).json({msg:'resetPassword'})
+  const{token,email,password}=req.body;
+  if (!email || !token || !password) {
+    throw new CustomError.BadRequestError('Please provide all values ');
+  }
+  const user = await User.findOne({ email });
+  if (user) {
+    if(token === user.passwordToken && Date.now() > user.passwordTokenExpirationDate){
+      user.passwordToken='';
+      user.password=password;
+      user.passwordTokenExpirationDate = null;
+      await user.save()
+    }
+
+  }
+
+  res.status(StatusCodes.OK).json({msg:'reset Password'})
 }
 
 module.exports = {
