@@ -6,7 +6,7 @@ const { attachCookiesToResponse, createTokenUser,  sendResetPasswordEmail,
   sendVerificationEmail } = require('../utils');
 const crypto = require('crypto');
 const { read } = require('fs');
-const origin = 'https://react-3t4g.onrender.com';
+const origin = 'https://re-q5hm.onrender.com';
 
 
 const register = async (req, res) => {
